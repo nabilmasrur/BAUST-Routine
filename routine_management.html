@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Routine Builder | BAUST</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --baust-primary: #003366;
+            --baust-secondary: #005A31;
+            --background-light: #f4f7f6;
+            --text-dark: #343a40;
+            --text-light: #f8f9fa;
+            --border-color: #dee2e6;
+            --sidebar-width: 260px;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            font-size: 16px;
+        }
+
+        #wrapper {
+            display: flex;
+            transition: padding-left 0.3s ease;
+        }
+
+        /* Sidebar */
+        #sidebar-wrapper {
+            min-height: 100vh;
+            width: var(--sidebar-width);
+            margin-left: 0;
+            background-color: var(--baust-primary);
+            color: var(--text-light);
+            transition: margin 0.3s ease-out;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #wrapper.toggled #sidebar-wrapper {
+            margin-left: calc(-1 * var(--sidebar-width));
+        }
+
+        .sidebar-heading {
+            background-color: #002244;
+            padding: 1.25rem 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .logo-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+        }
+        
+        .sidebar-heading span {
+            font-size: 1.1rem;
+        }
+
+        .list-group {
+            flex-grow: 1;
+        }
+
+        .list-group-item {
+            background-color: transparent !important;
+            border: none !important;
+            color: rgba(255, 255, 255, 0.8) !important;
+            padding: 1rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+            font-size: 0.95rem;
+        }
+
+        .list-group-item:hover, .list-group-item.active {
+            background-color: var(--baust-secondary) !important;
+            color: white !important;
+            border-left-color: #ffc107;
+            transform: translateX(5px);
+        }
+        
+        .list-group-item i {
+            width: 25px;
+            margin-right: 5px;
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: auto;
+        }
+        
+        .sidebar-footer .admin-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .sidebar-footer .admin-role {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Page Content */
+        #page-content-wrapper {
+            width: 100%;
+            padding-left: var(--sidebar-width);
+            transition: padding-left 0.3s ease-out;
+        }
+        
+        #wrapper.toggled #page-content-wrapper {
+            padding-left: 0;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 1rem 2rem;
+            height: 80px;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-content {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        #menu-toggle {
+            color: var(--baust-primary);
+            cursor: pointer;
+            font-size: 1.5rem;
+            margin-right: 20px;
+        }
+        
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            background-color: var(--baust-primary);
+            color: white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-right: 12px;
+        }
+        
+        .user-info .user-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 1rem;
+        }
+        
+        .user-info .user-role {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        
+        .dropdown-menu {
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        .content-wrapper {
+            padding: 30px;
+            max-width: 1800px;
+            margin: auto;
+        }
+
+        /* Step Navigation */
+        .step-navigation {
+            display: flex;
+            justify-content: space-around;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        .step.active {
+            color: var(--baust-secondary);
+        }
+        
+        .step.completed {
+            color: #198754;
+        }
+
+        .step-number {
+            width: 35px;
+            height: 35px;
+            background-color: var(--border-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #6c757d;
+        }
+        
+        .step.active .step-number {
+            background-color: var(--baust-secondary);
+            color: white;
+        }
+        
+        .step.completed .step-number {
+            background-color: #198754;
+            color: white;
+        }
+
+        /* Main Card */
+        .main-card {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .step-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .step-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .section-header {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--baust-primary);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        /* Draggable Course Cards */
+        .resource-panel {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            background-color: #fff;
+            height: 100%;
+        }
+        
+        .resource-header {
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .course-list {
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .draggable-course {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: grab;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        
+        .draggable-course:hover {
+            background-color: #e9ecef;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .draggable-course.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+            background-color: var(--baust-secondary);
+            color: white;
+        }
+        
+        .course-code {
+            font-weight: 700;
+            color: var(--baust-primary);
+            font-size: 0.9rem;
+        }
+        
+        .assigned-teacher {
+            font-size: 0.8rem;
+            color: var(--baust-secondary);
+        }
+        
+        /* Timetable Grid */
+        .timetable-container {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .timetable-grid {
+            display: grid;
+            grid-template-columns: 100px repeat(10, 1fr);
+            gap: 2px;
+            background-color: #f0f0f0;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 2px;
+            min-width: 1400px;
+        }
+
+        .grid-header, .grid-day, .grid-cell {
+            background-color: #fff;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        .grid-header {
+            font-weight: 600;
+            color: var(--baust-primary);
+            background-color: #e9ecef;
+        }
+        
+        .grid-day {
+            font-weight: 700;
+            background-color: #f8f9fa;
+        }
+
+        .grid-cell {
+            min-height: 80px;
+            position: relative;
+            border: 2px dashed var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .grid-cell.drop-zone {
+            background-color: #d4edda;
+            border-color: #198754;
+            transform: scale(1.02);
+        }
+
+        .grid-cell.drop-invalid {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+        }
+        
+        .class-entry {
+            background-color: var(--baust-secondary);
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            text-align: left;
+            height: 100%;
+            cursor: move;
+            position: relative;
+            user-select: none;
+        }
+        
+        .class-entry.lab {
+            background-color: #8B4513;
+        }
+        
+        .class-entry.break {
+            background-color: #6c757d;
+        }
+        
+        .btn-remove-class {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.6rem;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .class-entry:hover .btn-remove-class {
+            opacity: 1;
+        }
+
+        /* Search Bar */
+        .search-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            padding-left: 40px;
+            border-radius: 8px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            z-index: 10;
+        }
+
+        /* Navigation Buttons */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .btn-nav {
+            padding: 12px 30px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-prev {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-prev:hover {
+            background-color: #5a6268;
+        }
+
+        .btn-next {
+            background-color: var(--baust-secondary);
+            color: white;
+        }
+
+        .btn-next:hover {
+            background-color: #004d29;
+            transform: translateY(-2px);
+        }
+
+        .btn-submit {
+            background-color: var(--baust-primary);
+            color: white;
+        }
+        
+        .btn-submit:hover {
+            background-color: #00264d;
+            transform: translateY(-2px);
+        }
+        
+        .course-teacher-row {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s;
+        }
+        
+        .course-teacher-row:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .time-config-btn {
+            background: var(--baust-primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-left: auto;
+        }
+
+        .time-config-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .time-config-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 992px) {
+            #sidebar-wrapper {
+                margin-left: calc(-1 * var(--sidebar-width));
+            }
+            
+            #wrapper.toggled #sidebar-wrapper {
+                margin-left: 0;
+            }
+
+            #page-content-wrapper {
+                padding-left: 0;
+            }
+            
+            .navbar {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper">
+            <div class="sidebar-heading">
+                <img src="baust_logo.png" alt="BAUST Logo" class="logo-icon">
+                <span>BAUST Routine</span>
+            </div>
+            <div class="list-group list-group-flush my-3">
+                <a href="admin_dashboard.html" class="list-group-item">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </a>
+                <a href="routine_management.html" class="list-group-item active">
+                    <i class="fas fa-calendar-plus me-2"></i>Routine Builder
+                </a>
+                <a href="view_routines.html" class="list-group-item">
+                    <i class="fas fa-eye me-2"></i>View Routines
+                </a>
+                <a href="resource_management.html" class="list-group-item">
+                    <i class="fas fa-cogs me-2"></i>Manage Resources
+                </a>
+                <a href="#" class="list-group-item" data-bs-toggle="modal" data-bs-target="#passwordModal">
+                    <i class="fas fa-users-cog me-2"></i>User Management
+                </a>
+                <a href="reports.html" class="list-group-item">
+                    <i class="fas fa-chart-line me-2"></i>Reports
+                </a>
+                <a href="#" class="list-group-item" data-bs-toggle="modal" data-bs-target="#aboutModal">
+                    <i class="fas fa-info-circle me-2"></i>About
+                </a>
+            </div>
+            <!-- Sidebar Footer with Admin Info -->
+            <div class="sidebar-footer">
+                <div class="admin-name">Admin User</div>
+                <div class="admin-role">System Administrator</div>
+            </div>
+        </div>
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <nav class="navbar">
+                <div class="navbar-content">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-align-left" id="menu-toggle"></i>
+                        <h2 class="fs-2 m-0 ms-3">Smart Routine Builder</h2>
+                    </div>
+                    <div class="dropdown user-profile">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="user-avatar">A</div>
+                            <div class="user-info d-none d-md-block">
+                                <div class="user-name">Admin User</div>
+                                <div class="user-role">System Administrator</div>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="admin_profile.html"><i class="fas fa-user me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="admin_settings.html"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="login.html"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="content-wrapper">
+                <!-- Step Navigation -->
+                <div class="step-navigation">
+                    <div class="step active" data-step="1">
+                        <div class="step-number">1</div>
+                        <span>Basic Info</span>
+                    </div>
+                    <div class="step" data-step="2">
+                        <div class="step-number">2</div>
+                        <span>Assign Teachers</span>
+                    </div>
+                    <div class="step" data-step="3">
+                        <div class="step-number">3</div>
+                        <span>Build Schedule</span>
+                    </div>
+                </div>
+
+                <!-- Main Card -->
+                <div class="main-card">
+                    <!-- Step 1: Basic Information -->
+                    <div class="step-content active" id="step-1">
+                        <h3 class="section-header">Routine Information</h3>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Department</label>
+                                <select class="form-select" id="department" required>
+                                    <option value="CSE">CSE</option>
+                                    <option value="EEE">EEE</option>
+                                    <option value="ICT">ICT</option>
+                                    <option value="IPE">IPE</option>
+                                    <option value="ME">ME</option>
+                                    <option value="BBA">BBA</option>
+                                    <option value="ENGLISH">ENGLISH</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Semester</label>
+                                <select class="form-select" id="semester" required>
+                                    <option value="Summer">Summer</option>
+                                    <option value="Winter">Winter</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Year</label>
+                                <input type="number" class="form-control" id="year" value="2025" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Level-Term</label>
+                                <select class="form-select" id="level-term" onchange="loadCourses()" required>
+                                    <option value="1-I">1-I</option>
+                                    <option value="1-II">1-II</option>
+                                    <option value="2-I">2-I</option>
+                                    <option value="2-II" selected>2-II</option>
+                                    <option value="3-I">3-I</option>
+                                    <option value="3-II">3-II</option>
+                                    <option value="4-I">4-I</option>
+                                    <option value="4-II">4-II</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Section</label>
+                                <select class="form-select" id="section" required>
+                                    <option value="A">A</option>
+                                    <option value="B" selected>B</option>
+                                    <option value="C">C</option>
+                                </select>
+                            </div>
+                        </div>
+                        <h4 class="mt-4">Advisor & DPC Information</h4><hr>
+                        <div class="row">
+                            <div class="col-md-6 mb-3"><label class="form-label">Advisor Name</label><input type="text" class="form-control" id="advisor-name" required></div>
+                            <div class="col-md-6 mb-3"><label class="form-label">Advisor Phone</label><input type="tel" class="form-control" id="advisor-phone" required></div>
+                            <div class="col-md-6 mb-3"><label class="form-label">DPC Name</label><input type="text" class="form-control" id="dpc-name" required></div>
+                            <div class="col-md-6 mb-3"><label class="form-label">DPC Phone</label><input type="tel" class="form-control" id="dpc-phone" required></div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Course & Teacher Allocation -->
+                    <div class="step-content" id="step-2">
+                        <h3 class="section-header">Assign Teachers to Courses</h3>
+                        <div class="search-container">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="form-control search-input" id="course-search" placeholder="Search courses...">
+                        </div>
+                        <div id="course-teacher-allocation"></div>
+                    </div>
+
+                    <!-- Step 3: Visual Schedule Builder -->
+                    <div class="step-content" id="step-3">
+                        <div class="time-config-section">
+                            <div class="time-config-header">
+                                <h3 class="section-header mb-0">Build Schedule (Drag & Drop)</h3>
+                                <button class="time-config-btn" data-bs-toggle="modal" data-bs-target="#timeConfigModal">
+                                    <i class="fas fa-clock me-1"></i>Configure Time Slots
+                                </button>
+                            </div>
+                            <p class="text-muted mb-0">Drag courses from the left panel and drop them into the timetable. Configure time slots as needed.</p>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-lg-3">
+                                <div class="resource-panel">
+                                    <div class="resource-header"><i class="fas fa-book-reader"></i> Unscheduled Classes</div>
+                                    <div class="course-list" id="unscheduled-classes"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-9">
+                                <div class="timetable-container">
+                                    <div class="timetable-grid" id="timetable-grid"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation Buttons -->
+                    <div class="nav-buttons">
+                        <button class="btn-nav btn-prev" onclick="previousStep()" style="display: none;"><i class="fas fa-arrow-left me-2"></i>Previous</button>
+                        <button class="btn-nav btn-next" onclick="nextStep()">Next<i class="fas fa-arrow-right ms-2"></i></button>
+                        <button class="btn-nav btn-submit" onclick="saveRoutine()" style="display: none;"><i class="fas fa-save me-2"></i>Save Routine</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Room & Duration -->
+    <div class="modal fade" id="schedule-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Schedule Class</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Select Room</label>
+                        <select class="form-select" id="modal-room">
+                            <option value="">Select a room</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Duration</label>
+                        <select class="form-select" id="modal-duration">
+                            <option value="1">1 Hour</option>
+                            <option value="2">2 Hours</option>
+                            <option value="3">3 Hours</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirm-schedule">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Time Configuration Modal -->
+    <div class="modal fade" id="timeConfigModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Configure Time Slots</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-3">You can customize the time slots according to your needs. Changes will be applied to the current timetable.</p>
+                    <div id="time-slots-container">
+                        <!-- Time slots will be populated here -->
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary mt-3" onclick="addTimeSlot()">
+                        <i class="fas fa-plus me-1"></i>Add Time Slot
+                    </button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="applyTimeSlots()">Apply Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Modal -->
+    <div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="passwordModalLabel"><i class="fas fa-shield-alt me-2"></i>Admin Verification</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>To access User Management, please enter your password.</p>
+                    <div class="form-group">
+                        <label for="admin-password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="admin-password" required>
+                        <div class="invalid-feedback">Incorrect password. Please try again.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" style="background-color: var(--baust-secondary);" onclick="verifyPassword()">Verify</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Modal -->
+    <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="aboutModalLabel"><i class="fas fa-info-circle me-2"></i>About This Project</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>This <strong>BAUST Routine & Room Management System</strong> is a web-based application designed to streamline the academic scheduling process.</p>
+                    <h5 class="mt-4">Project History</h5>
+                    <p>The initial version (v1.0) of this project was developed as a desktop-based application using <strong>JavaFX</strong>. It was created for the "Software Development Lab" course during the 2-1 semester.</p>
+                    <p>This current web-based version (v2.0) is an enhanced and more scalable implementation, developed for the "Database Management Lab" project.</p>
+                    <hr>
+                    <h5 class="mt-4">Development Team</h5>
+                    <ul>
+                        <li><strong>Abu Nabil MD. Masrur</strong></li>
+                        <li><strong>Wasi Ahmed</strong></li>
+                        <li><strong>Md. Lemon Islam Bappy</strong></li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        var el = document.getElementById("wrapper");
+        var toggleButton = document.getElementById("menu-toggle");
+        toggleButton.onclick = function () { el.classList.toggle("toggled"); };
+
+        let currentStep = 1;
+        let allocatedCourses = [];
+        let timeSlots = [
+            { start: '08:00', end: '08:50', label: '08:00-08:50' },
+            { start: '09:00', end: '09:50', label: '09:00-09:50' },
+            { start: '10:00', end: '10:50', label: '10:00-10:50' },
+            { start: '10:50', end: '11:30', label: 'Class Break', isBreak: true },
+            { start: '11:30', end: '12:20', label: '11:30-12:20' },
+            { start: '12:30', end: '13:20', label: '12:30-01:20' },
+            { start: '13:30', end: '14:20', label: '01:30-02:20' },
+            { start: '14:30', end: '15:20', label: '02:30-03:20' },
+            { start: '15:30', end: '16:20', label: '03:30-04:20' },
+            { start: '16:30', end: '17:20', label: '04:30-05:20' }
+        ];
+
+        // --- DUMMY DATA ---
+        const allCourses = {
+            '2-II': [
+                { code: 'CSE 2201', title: 'Data Structures and Algorithms II', credit: 3.0 },
+                { code: 'CSE 2202', title: 'Data Structures and Algorithms II Sessional', credit: 1.5 },
+                { code: 'CSE 2203', title: 'Theory of Computation', credit: 3.0 },
+                { code: 'CSE 2205', title: 'Digital Logic Design', credit: 3.0 },
+                { code: 'CSE 2206', title: 'Digital Logic Design Sessional', credit: 1.5 },
+                { code: 'MATH 2247', title: 'Math-IV', credit: 3.0 },
+                { code: 'HUM 2249', title: 'Engineering Ethics', credit: 2.0 }
+            ]
+        };
+
+        const allTeachers = [
+            { short: 'AKZ', full: 'Abdullah Al Kafi Zaman' },
+            { short: 'KS', full: 'Md. Khalid Syfullah' },
+            { short: 'RA', full: 'Rifat Ahmed' },
+            { short: 'JB', full: 'Jahangir Badsha' },
+            { short: 'RR', full: 'Rafsan Reza' }
+        ];
+
+        const allRooms = ['101', '102', '201', '202', '203', '301', '302', '304', '411', '412', 'Lab-1', 'Lab-2', 'Lab-3'];
+
+        // Holds all schedules to check for conflicts
+        let globalSchedule = {};
+        let currentDraggedItem = null;
+
+        // Step Navigation
+        function goToStep(step) {
+            document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.querySelector(`[data-step="${step}"]`).classList.add('active');
+            document.getElementById(`step-${step}`).classList.add('active');
+            
+            for (let i = 1; i < step; i++) {
+                document.querySelector(`[data-step="${i}"]`).classList.add('completed');
+            }
+            
+            currentStep = step;
+            updateNavigationButtons();
+        }
+
+        function nextStep() {
+            if (currentStep === 1) {
+                // Validate basic info first
+                const department = document.getElementById('department').value;
+                const semester = document.getElementById('semester').value;
+                const year = document.getElementById('year').value;
+                const levelTerm = document.getElementById('level-term').value;
+                const section = document.getElementById('section').value;
+                
+                if (!department || !semester || !year || !levelTerm || !section) {
+                    alert('Please fill all basic information fields.');
+                    return;
+                }
+                
+                loadCourses();
+                goToStep(2);
+            } else if (currentStep === 2) {
+                allocatedCourses = [];
+                document.querySelectorAll('.course-teacher-row').forEach(row => {
+                    const courseCode = row.dataset.course;
+                    const teacher = row.querySelector('.teacher-select').value;
+                    if (teacher) {
+                        allocatedCourses.push({ code: courseCode, teacher: teacher });
+                    }
+                });
+                
+                if (allocatedCourses.length === 0) {
+                    alert('Please assign at least one teacher.');
+                    return;
+                }
+                
+                populateUnscheduledList();
+                buildTimetable();
+                goToStep(3);
+            }
+        }
+        
+        function previousStep() {
+            if (currentStep > 1) {
+                goToStep(currentStep - 1);
+            }
+        }
+        
+        function updateNavigationButtons() {
+            document.querySelector('.btn-prev').style.display = currentStep > 1 ? 'inline-block' : 'none';
+            document.querySelector('.btn-next').style.display = currentStep < 3 ? 'inline-block' : 'none';
+            document.querySelector('.btn-submit').style.display = currentStep === 3 ? 'block' : 'none';
+        }
+
+        function loadCourses() {
+            const levelTerm = document.getElementById('level-term').value;
+            const courses = allCourses[levelTerm] || [];
+            const container = document.getElementById('course-teacher-allocation');
+            
+            if (courses.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">No courses found for this level-term.</div>';
+                return;
+            }
+            
+            container.innerHTML = courses.map(course => `
+                <div class="row mb-3 align-items-center course-teacher-row" data-course="${course.code}">
+                    <div class="col-md-5">
+                        <strong class="course-code-text">${course.code}</strong><br>
+                        <small class="text-muted course-title-text">${course.title}</small>
+                    </div>
+                    <div class="col-md-5">
+                        <select class="form-select teacher-select">
+                            <option value="">Assign a Teacher</option>
+                            ${allTeachers.map(t => `<option value="${t.short}">${t.full} (${t.short})</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <span class="badge bg-secondary">${course.credit} Cr</span>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Add search functionality
+            const searchInput = document.getElementById('course-search');
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    document.querySelectorAll('.course-teacher-row').forEach(row => {
+                        const courseCode = row.querySelector('.course-code-text').textContent.toLowerCase();
+                        const courseTitle = row.querySelector('.course-title-text').textContent.toLowerCase();
+                        if (courseCode.includes(searchTerm) || courseTitle.includes(searchTerm)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                });
+            }
+        }
+        
+        function populateUnscheduledList() {
+            const container = document.getElementById('unscheduled-classes');
+            container.innerHTML = allocatedCourses.map(ac => {
+                const course = allCourses[document.getElementById('level-term').value].find(c => c.code === ac.code);
+                return `
+                <div class="draggable-course" draggable="true" data-course="${ac.code}" data-teacher="${ac.teacher}">
+                    <div class="course-code">${ac.code}</div>
+                    <div class="assigned-teacher">${ac.teacher}</div>
+                    <small class="text-muted">${course.title}</small>
+                </div>
+            `}).join('');
+            initializeDragAndDrop();
+        }
+
+        function buildTimetable() {
+            const grid = document.getElementById('timetable-grid');
+            grid.innerHTML = '';
+            
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
+            
+            // Add header row
+            grid.innerHTML += `<div class="grid-header">Time/Day</div>`;
+            timeSlots.forEach(slot => {
+                grid.innerHTML += `<div class="grid-header">${slot.label}</div>`;
+            });
+            
+            // Add day rows
+            days.forEach(day => {
+                grid.innerHTML += `<div class="grid-day">${day.substring(0,3).toUpperCase()}</div>`;
+                timeSlots.forEach(slot => {
+                    const cellClass = slot.isBreak ? 'grid-cell break-cell' : 'grid-cell';
+                    grid.innerHTML += `<div class="${cellClass}" data-day="${day}" data-time="${slot.start}" data-is-break="${slot.isBreak || false}"></div>`;
+                });
+            });
+            
+            // Style break cells
+            document.querySelectorAll('.break-cell').forEach(cell => {
+                cell.innerHTML = `<div class="class-entry break">BREAK</div>`;
+                cell.style.cursor = 'not-allowed';
+            });
+            
+            initializeDropZones();
+        }
+
+        // Initialize Drag and Drop
+        function initializeDragAndDrop() {
+            const draggableCourses = document.querySelectorAll('.draggable-course');
+            
+            draggableCourses.forEach(course => {
+                course.addEventListener('dragstart', handleDragStart);
+                course.addEventListener('dragend', handleDragEnd);
+            });
+        }
+
+        function initializeDropZones() {
+            const dropZones = document.querySelectorAll('.grid-cell:not(.break-cell)');
+            
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', handleDragOver);
+                zone.addEventListener('dragenter', handleDragEnter);
+                zone.addEventListener('dragleave', handleDragLeave);
+                zone.addEventListener('drop', handleDrop);
+            });
+        }
+
+        function handleDragStart(e) {
+            currentDraggedItem = this;
+            this.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', this.dataset.course);
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            document.querySelectorAll('.grid-cell').forEach(cell => {
+                cell.classList.remove('drop-zone', 'drop-invalid');
+            });
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+            if (this.dataset.isBreak !== 'true' && !this.hasChildNodes()) {
+                this.classList.add('drop-zone');
+            } else {
+                this.classList.add('drop-invalid');
+            }
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drop-zone', 'drop-invalid');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            this.classList.remove('drop-zone', 'drop-invalid');
+            
+            if (this.dataset.isBreak === 'true' || this.hasChildNodes()) {
+                return;
+            }
+
+            if (currentDraggedItem) {
+                const scheduleModal = new bootstrap.Modal(document.getElementById('schedule-modal'));
+                
+                // Populate rooms dropdown
+                const roomSelect = document.getElementById('modal-room');
+                roomSelect.innerHTML = '<option value="">Select a room</option>' + 
+                    allRooms.map(room => `<option value="${room}">${room}</option>`).join('');
+                
+                document.getElementById('confirm-schedule').onclick = () => {
+                    const room = document.getElementById('modal-room').value;
+                    const duration = parseInt(document.getElementById('modal-duration').value);
+                    
+                    if (room) {
+                        const day = this.dataset.day;
+                        const time = this.dataset.time;
+                        const teacher = currentDraggedItem.dataset.teacher;
+                        const courseCode = currentDraggedItem.dataset.course;
+
+                        // Check if all required cells are available
+                        let allCellsAvailable = true;
+                        const cellsToOccupy = [];
+                        
+                        for (let i = 0; i < duration; i++) {
+                            const currentCell = getNextCell(day, time, i);
+                            if (!currentCell || currentCell.hasChildNodes() || currentCell.dataset.isBreak === 'true') {
+                                allCellsAvailable = false;
+                                break;
+                            }
+                            cellsToOccupy.push(currentCell);
+                        }
+
+                        if (allCellsAvailable) {
+                            // Occupy all cells
+                            cellsToOccupy.forEach((cell, index) => {
+                                if (cell) {
+                                    cell.innerHTML = `
+                                        <div class="class-entry" data-course="${courseCode}" data-teacher="${teacher}" data-room="${room}" data-duration="${duration}" data-day="${day}" data-time="${time}">
+                                            <div class="course-code">${courseCode}</div>
+                                            <div class="assigned-teacher">${teacher} | ${room}</div>
+                                            ${index === 0 ? `<button class="btn-remove-class" onclick="removeClass(this.parentElement)">×</button>` : ''}
+                                        </div>`;
+                                }
+                            });
+
+                            currentDraggedItem.remove();
+                            scheduleModal.hide();
+                            updateGlobalSchedule();
+                        } else {
+                            alert('Not enough consecutive available slots for this duration.');
+                        }
+                    } else {
+                        alert('Please select a room.');
+                    }
+                };
+                
+                scheduleModal.show();
+            }
+        }
+
+        function getNextCell(day, startTime, offset) {
+            const startIndex = timeSlots.findIndex(slot => slot.start === startTime);
+            if (startIndex === -1 || startIndex + offset >= timeSlots.length) return null;
+            const newTime = timeSlots[startIndex + offset].start;
+            return document.querySelector(`.grid-cell[data-day="${day}"][data-time="${newTime}"]`);
+        }
+
+        function removeClass(classEntry) {
+            const cell = classEntry.parentElement;
+            const courseData = { 
+                code: classEntry.dataset.course, 
+                teacher: classEntry.dataset.teacher 
+            };
+            
+            const duration = parseInt(classEntry.dataset.duration);
+            const day = classEntry.dataset.day;
+            const time = classEntry.dataset.time;
+            
+            // Remove all occupied cells
+            for(let i = 0; i < duration; i++){
+                const currentCell = getNextCell(day, time, i);
+                if(currentCell) currentCell.innerHTML = '';
+            }
+
+            // Add back to unscheduled list
+            const unscheduledList = document.getElementById('unscheduled-classes');
+            const course = allCourses[document.getElementById('level-term').value].find(c => c.code === courseData.code);
+            
+            unscheduledList.innerHTML += `
+                <div class="draggable-course" draggable="true" data-course="${courseData.code}" data-teacher="${courseData.teacher}">
+                    <div class="course-code">${courseData.code}</div>
+                    <div class="assigned-teacher">${courseData.teacher}</div>
+                    <small class="text-muted">${course.title}</small>
+                </div>
+            `;
+            
+            initializeDragAndDrop();
+            updateGlobalSchedule();
+        }
+
+        function updateGlobalSchedule() {
+            globalSchedule = {};
+            document.querySelectorAll('.class-entry').forEach(entry => {
+                const day = entry.dataset.day;
+                const time = entry.dataset.time;
+                if (!globalSchedule[day]) globalSchedule[day] = {};
+                globalSchedule[day][time] = {
+                    teacher: entry.dataset.teacher,
+                    room: entry.dataset.room,
+                };
+            });
+        }
+
+        function saveRoutine() {
+            // Collect all routine data
+            const routineData = {
+                department: document.getElementById('department').value,
+                semester: document.getElementById('semester').value,
+                year: document.getElementById('year').value,
+                levelTerm: document.getElementById('level-term').value,
+                section: document.getElementById('section').value,
+                advisor: {
+                    name: document.getElementById('advisor-name').value,
+                    phone: document.getElementById('advisor-phone').value
+                },
+                dpc: {
+                    name: document.getElementById('dpc-name').value,
+                    phone: document.getElementById('dpc-phone').value
+                },
+                allocatedCourses: allocatedCourses,
+                schedule: globalSchedule,
+                timestamp: new Date().toISOString()
+            };
+            
+            // Save to localStorage (in real app, this would go to a server)
+            const routines = JSON.parse(localStorage.getItem('routines')) || [];
+            routines.push(routineData);
+            localStorage.setItem('routines', JSON.stringify(routines));
+            
+            alert('Routine Saved Successfully!');
+        }
+
+        // Other functions remain the same...
+        function verifyPassword() {
+            const passwordInput = document.getElementById('admin-password');
+            const defaultPassword = 'admin';
+
+            if (passwordInput.value === defaultPassword) {
+                window.location.href = 'user_management.html';
+            } else {
+                passwordInput.classList.add('is-invalid');
+            }
+        }
+        
+        document.getElementById('admin-password')?.addEventListener('input', function() {
+            this.classList.remove('is-invalid');
+        });
+
+        // Time Configuration Functions
+        function populateTimeSlotsModal() {
+            const container = document.getElementById('time-slots-container');
+            container.innerHTML = timeSlots.map((slot, index) => `
+                <div class="row mb-2 align-items-center time-slot-row" data-index="${index}">
+                    <div class="col-md-4">
+                        <input type="time" class="form-control start-time" value="${slot.start}" ${slot.isBreak ? 'disabled' : ''}>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="time" class="form-control end-time" value="${slot.end}" ${slot.isBreak ? 'disabled' : ''}>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control slot-label" value="${slot.label}" placeholder="Label">
+                    </div>
+                    <div class="col-md-1">
+                        ${!slot.isBreak ? `<button class="btn btn-sm btn-danger" onclick="removeTimeSlot(${index})"><i class="fas fa-times"></i></button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addTimeSlot() {
+            timeSlots.push({ start: '17:30', end: '18:20', label: '17:30-18:20' });
+            populateTimeSlotsModal();
+        }
+
+        function removeTimeSlot(index) {
+            timeSlots.splice(index, 1);
+            populateTimeSlotsModal();
+        }
+
+        function applyTimeSlots() {
+            // Update time slots from modal
+            document.querySelectorAll('.time-slot-row').forEach(row => {
+                const index = parseInt(row.dataset.index);
+                timeSlots[index].start = row.querySelector('.start-time').value;
+                timeSlots[index].end = row.querySelector('.end-time').value;
+                timeSlots[index].label = row.querySelector('.slot-label').value;
+            });
+            
+            // Rebuild timetable
+            buildTimetable();
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('timeConfigModal'));
+            modal.hide();
+            
+            alert('Time slots updated successfully!');
+        }
+
+        // Initialize time slots modal when shown
+        document.getElementById('timeConfigModal')?.addEventListener('show.bs.modal', function () {
+            populateTimeSlotsModal();
+        });
+        
+        window.onload = function() {
+            if (window.innerWidth < 992) {
+                document.getElementById("wrapper").classList.add("toggled");
+            }
+            goToStep(1);
+        };
+    </script>
+</body>
+</html>
